@@ -1,15 +1,17 @@
 <script>
   import { push } from 'svelte-spa-router';
   let telefono = "";
+  let nombre = "Usuario ";
 
   async function handleLogin() {
     if (!telefono.trim()) return alert("Ingresa tu número de teléfono");
+    nombre = nombre + telefono;
 
     // Llamada al backend para registrar/buscar la persona
     const res = await fetch("http://localhost:8080/api/persona", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ telefono }),
+      body: JSON.stringify({ nombre, telefono }),
     });
 
     const data = await res.json();

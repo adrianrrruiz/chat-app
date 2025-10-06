@@ -20,7 +20,7 @@ services:
       - "5173:5173"
     volumes:
       - ./chat-frontend:/app
-      # Evita que se sobreescriba node_modules
-      - /app/node_modules
+      # # Evita que se sobreescriba node_modules
+      # - /app/node_modules
 
 

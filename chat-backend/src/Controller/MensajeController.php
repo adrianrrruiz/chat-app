@@ -1,81 +1,77 @@
 <?php
-
 namespace App\Controller;
 
-use App\Entity\Mensaje;
-use App\Form\MensajeType;
-use App\Repository\MensajeRepository;
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Routing\Annotation\Route;
+use App\Service\MensajeService;
 
-#[Route('/mensaje')]
-final class MensajeController extends AbstractController
+class MensajeController
 {
-    #[Route(name: 'app_mensaje_index', methods: ['GET'])]
-    public function index(MensajeRepository $mensajeRepository): Response
+    private $mensajeService;
+
+    public function __construct(MensajeService $mensajeService)
     {
-        return $this->render('mensaje/index.html.twig', [
-            'mensajes' => $mensajeRepository->findAll(),
+        $this->mensajeService = $mensajeService;
+    }
+
+    #[Route('/api/mensaje', methods: ['GET'])]
+    public function list(): JsonResponse
+    {
+        $mensajes = $this->mensajeService->getAll();
+        $data = array_map(fn($p) => [
+            'id' => $p->getId(),
+            'contenido' => $p->getContenido(),
+            'fecha' => $p->getFecha(),
+        ], $mensajes);
+        return new JsonResponse($data);
+    }
+
+    #[Route('/api/mensaje/{id}', methods: ['GET'])]
+    public function getOne($id): JsonResponse
+    {
+        $mensaje = $this->mensajeService->getById($id);
+        if (!$mensaje) return new JsonResponse(['error' => 'No encontrada'], 404);
+        return new JsonResponse([
+            'id' => $mensaje->getId(),
+            'contenido' => $mensaje->getContenido(),
+            'fecha' => $mensaje->getFecha(),
         ]);
     }
 
-    #[Route('/new', name: 'app_mensaje_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    #[Route('/api/mensaje', methods: ['POST'])]
+    public function create(Request $req): JsonResponse
     {
-        $mensaje = new Mensaje();
-        $form = $this->createForm(MensajeType::class, $mensaje);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->persist($mensaje);
-            $entityManager->flush();
-
-            return $this->redirectToRoute('app_mensaje_index', [], Response::HTTP_SEE_OTHER);
-        }
-
-        return $this->render('mensaje/new.html.twig', [
-            'mensaje' => $mensaje,
-            'form' => $form,
-        ]);
+        $data = json_decode($req->getContent(), true);
+        $mensaje = $this->mensajeService->create($data['contenido'], $data['persona_id'], $data['chat_id']);
+        return new JsonResponse([
+            'id'       => $mensaje->getId(),
+            'contenido'=> $mensaje->getContenido(),
+            'fecha'    => $mensaje->getFecha()->format(DATE_ATOM),
+            'persona'  => [
+                'id' => $mensaje->getPersona()->getId(),
+                'nombre' => $mensaje->getPersona()->getNombre()
+            ],
+            'chat' => [
+                'id' => $mensaje->getChat()->getId(),
+                'titulo' => $mensaje->getChat()->getTitulo()
+            ]
+        ], 201);
     }
 
-    #[Route('/{id}', name: 'app_mensaje_show', methods: ['GET'])]
-    public function show(Mensaje $mensaje): Response
+    #[Route('/api/mensaje/{id}', methods: ['PUT'])]
+    public function update($id, Request $req): JsonResponse
     {
-        return $this->render('mensaje/show.html.twig', [
-            'mensaje' => $mensaje,
-        ]);
+        $data = json_decode($req->getContent(), true);
+        $mensaje = $this->mensajeService->update($id, $data);
+        if (!$mensaje) return new JsonResponse(['error' => 'No encontrada'], 404);
+        return new JsonResponse(['success' => true]);
     }
 
-    #[Route('/{id}/edit', name: 'app_mensaje_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Mensaje $mensaje, EntityManagerInterface $entityManager): Response
+    #[Route('/api/mensaje/{id}', methods: ['DELETE'])]
+    public function delete($id): JsonResponse
     {
-        $form = $this->createForm(MensajeType::class, $mensaje);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->flush();
-
-            return $this->redirectToRoute('app_mensaje_index', [], Response::HTTP_SEE_OTHER);
-        }
-
-        return $this->render('mensaje/edit.html.twig', [
-            'mensaje' => $mensaje,
-            'form' => $form,
-        ]);
-    }
-
-    #[Route('/{id}', name: 'app_mensaje_delete', methods: ['POST'])]
-    public function delete(Request $request, Mensaje $mensaje, EntityManagerInterface $entityManager): Response
-    {
-        if ($this->isCsrfTokenValid('delete'.$mensaje->getId(), $request->getPayload()->getString('_token'))) {
-            $entityManager->remove($mensaje);
-            $entityManager->flush();
-        }
-
-        return $this->redirectToRoute('app_mensaje_index', [], Response::HTTP_SEE_OTHER);
+        $ok = $this->mensajeService->delete($id);
+        return new JsonResponse(['success' => $ok]);
     }
 }
