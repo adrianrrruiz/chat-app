@@ -1,0 +1,37 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mensaje index{% endblock %}
+
+{% block body %}
+    <h1>Mensaje index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Contenido</th>
+                <th>Fecha</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for mensaje in mensajes %}
+            <tr>
+                <td>{{ mensaje.id }}</td>
+                <td>{{ mensaje.contenido }}</td>
+                <td>{{ mensaje.fecha ? mensaje.fecha|date('Y-m-d H:i:s') : '' }}</td>
+                <td>
+                    <a href="{{ path('app_mensaje_show', {'id': mensaje.id}) }}">show</a>
+                    <a href="{{ path('app_mensaje_edit', {'id': mensaje.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="4">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_mensaje_new') }}">Create new</a>
+{% endblock %}

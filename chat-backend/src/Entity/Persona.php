@@ -16,6 +16,9 @@ class Persona
     #[ORM\Column(length: 100)]
     private ?string $nombre = null;
 
+    #[ORM\Column(length: 20, unique: true)]
+    private ?string $telefono = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -30,6 +33,17 @@ class Persona
     {
         $this->nombre = $nombre;
 
+        return $this;
+    }
+
+    public function getTelefono(): ?string
+    {
+        return $this->telefono;
+    }
+
+    public function setTelefono(string $telefono): static
+    {
+        $this->telefono = $telefono;
         return $this;
     }
 }

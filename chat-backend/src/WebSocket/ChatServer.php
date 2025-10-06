@@ -49,7 +49,9 @@ class ChatServer implements MessageComponentInterface
 
         // Reenviar a todos
         foreach ($this->clients as $client) {
-            $client->send(json_encode($data));
+            if ($from !== $client) {
+                $client->send($msg);
+            }
         }
     }
 

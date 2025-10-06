@@ -1,21 +1,26 @@
-version: "3.9"
 services:
   backend:
     build:
       context: .
       dockerfile: docker/php/Dockerfile
-    volumes:
-      - ./chat-backend:/app
     ports:
       - "8080:8080"
+      - "8081:8081"
     environment:
       - DATABASE_URL=sqlite:////app/var/data.db
+    volumes:
+    - ./chat-backend:/app
+    # - ./chat-backend/vendor:/app/vendor
+
   frontend:
     build:
       context: .
       dockerfile: docker/svelte/Dockerfile
-    volumes:
-      - ./chat-frontend:/app
     ports:
       - "5173:5173"
+    volumes:
+      - ./chat-frontend:/app
+      # Evita que se sobreescriba node_modules
+      - /app/node_modules
+
 
