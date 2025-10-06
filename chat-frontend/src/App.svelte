@@ -17,36 +17,69 @@
 </script>
 
 <main>
-  <nav>
-    <a href="#/">Inicio</a>
-    <a href="#/personas">Personas</a>
-    <a href="#/chats">Chats</a>
-    <a href="#/mensajes">Mensajes</a>
-  </nav>
+  <header>
+    <div class="logo">💬 ChatApp</div>
+    <nav>
+      <a href="#/">Inicio</a>
+      <a href="#/personas">Personas</a>
+      <a href="#/chats">Chats</a>
+      <a href="#/mensajes">Mensajes</a>
+    </nav>
+  </header>
 
-  <Router {routes} />
+  <section class="content">
+    <Router {routes} />
+  </section>
 </main>
 
 <style>
-  main {
-    font-family: system-ui, sans-serif;
-    max-width: 700px;
-    margin: 30px auto;
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #171a52;
+    color: white;
+    padding: 15px 40px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  }
+
+  .logo {
+    font-weight: 700;
+    font-size: 1.2rem;
+    letter-spacing: 0.5px;
   }
 
   nav {
     display: flex;
-    gap: 12px;
-    margin-bottom: 20px;
+    gap: 24px;
   }
 
-  a {
+  nav a {
+    position: relative;
     text-decoration: none;
-    color: #171a52;
-    font-weight: 600;
+    color: white;
+    font-weight: 500;
+    transition: color 0.3s;
   }
 
-  a:hover {
-    text-decoration: underline;
+  nav a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -4px;
+    width: 0%;
+    height: 2px;
+    background: #fbcf32;
+    transition: width 0.3s ease;
+  }
+
+  nav a:hover {
+    color: #fbcf32;
+  }
+
+  nav a:hover::after {
+    width: 100%;
   }
 </style>
+
